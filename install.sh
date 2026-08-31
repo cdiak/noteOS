@@ -64,7 +64,7 @@ if [[ -z "${CLAUDE_CLI:-}" ]]; then
     CLAUDE_CLI="/opt/homebrew/bin/claude"
   fi
 fi
-NOTEOS_MODEL="${NOTEOS_MODEL:-}"
+NOTEOS_MODEL="${NOTEOS_MODEL:-claude-sonnet-5}"
 NOTEOS_TIMEOUT="${NOTEOS_TIMEOUT:-120}"
 NOTEOS_DIR="${NOTEOS_DIR:-${HOME}/Notes}"
 

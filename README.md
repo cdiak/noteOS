@@ -54,7 +54,7 @@ Each note carries YAML frontmatter (`created`, `source: noteos`), so Obsidian ca
 | Variable | Default | Meaning |
 |----------|---------|---------|
 | `NOTEOS_DIR` | `~/Notes` | vault folder for new notes |
-| `NOTEOS_MODEL` | claude CLI default | model passed to `claude --model` |
+| `NOTEOS_MODEL` | `claude-sonnet-5` | model passed to `claude --model` |
 | `NOTEOS_TIMEOUT` | `120` | agent timeout, seconds |
 | `WHISPER_CLI` | auto-detected | path to `whisper-cli` |
 | `WHISPER_MODEL` | auto-detected | path to a GGML model |

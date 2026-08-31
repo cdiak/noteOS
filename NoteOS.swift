@@ -85,7 +85,7 @@ struct Config {
             threads: Int(env["WHISPER_THREADS"] ?? "")
                 ?? max(2, ProcessInfo.processInfo.processorCount / 2),
             claudeBinary: claude,
-            claudeModel: (claudeModel?.isEmpty == false) ? claudeModel : nil,
+            claudeModel: (claudeModel?.isEmpty == false) ? claudeModel : "claude-sonnet-5",
             timeoutSeconds: Double(env["NOTEOS_TIMEOUT"] ?? "") ?? 120,
             notesDir: notesDir,
             orbDir: orbDir
@@ -565,7 +565,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
               whisper: \(config.whisperBinary)
               model:   \(config.modelPath)
               claude:  \(config.claudeBinary)
-              agent:   \(config.claudeModel ?? "(cli default)")
+              agent:   \(config.claudeModel ?? "claude-sonnet-5")
               notes:   \(config.notesDir.path)
               orb:     \(config.orbDir?.path ?? "(none — menu-bar indicator only)")
 
