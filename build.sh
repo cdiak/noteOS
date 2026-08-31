@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
-OUT="${1:-whispernote}"
+OUT="${1:-noteos}"
 echo "Compiling $OUT …"
 swiftc -O \
   -o "$OUT" \
-  WhisperNote.swift \
+  NoteOS.swift \
   -framework AppKit \
   -framework AVFoundation \
   -framework Carbon \
@@ -15,7 +15,7 @@ swiftc -O \
 CODESIGN_ID="${CODESIGN_ID:-$(security find-identity -v -p codesigning 2>/dev/null \
   | awk -F'"' '/Developer ID Application|Apple Development/ {print $2; exit}')}"
 if [[ -n "$CODESIGN_ID" ]]; then
-  codesign --force --identifier com.cdiak.whispernote -s "$CODESIGN_ID" "$OUT"
+  codesign --force --identifier com.cdiak.noteos -s "$CODESIGN_ID" "$OUT"
   echo "Signed with: $CODESIGN_ID"
 else
   echo "warning: no signing identity found — ad-hoc signature (Microphone grant resets on every rebuild)" >&2

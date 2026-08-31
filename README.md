@@ -1,8 +1,10 @@
-# whispernote
+# noteOS
 
 **⌥⇧N — speak a note anywhere, get a structured Markdown file in your vault.**
 
-Press **⌥⇧N** anywhere on your Mac and talk. Press **⌥⇧N** again. whispernote transcribes your words on-device with [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It then hands the transcript to a coding agent ([Claude Code](https://claude.com/claude-code), `claude -p`). The agent cleans the dictation, gives it a title, and structures it as a note. The note lands in `~/Notes` — an Obsidian vault — as `<timestamp> <title>.md`.
+The name is the hotkey: **N**ote + **O**ption + **S**hift. It is also the point: notes that work all over your operating system.
+
+Press **⌥⇧N** anywhere on your Mac and talk. Press **⌥⇧N** again. noteOS transcribes your words on-device with [whisper.cpp](https://github.com/ggml-org/whisper.cpp). It then hands the transcript to a coding agent ([Claude Code](https://claude.com/claude-code), `claude -p`). The agent cleans the dictation, gives it a title, and structures it as a note. The note lands in `~/Notes` — an Obsidian vault — as `<timestamp> <title>.md`.
 
 ```
 ⌥⇧N  →  ● record  →  ⌥⇧N  →  … transcribe  →  ◍ compose  →  ~/Notes/2026-08-31 143205 Title.md
@@ -10,7 +12,7 @@ Press **⌥⇧N** anywhere on your Mac and talk. Press **⌥⇧N** again. whispe
 
 No text field is needed. Focus does not matter. A floating orb shows the state: a **listening** wave while you speak, a **composing** ribbon while the agent writes.
 
-whispernote is the third sibling of [everywhisper](https://github.com/cdiak/everywhisper) (⌥⇧W, dictate → paste) and [optionai](https://github.com/cdiak/optionai) (⌥A+I, agent at the cursor). Same skeleton: one Swift file, a menu-bar item, a LaunchAgent.
+noteOS is the third sibling of [everywhisper](https://github.com/cdiak/everywhisper) (⌥⇧W, dictate → paste) and [optionai](https://github.com/cdiak/optionai) (⌥A+I, agent at the cursor). Same skeleton: one Swift file, a menu-bar item, a LaunchAgent.
 
 ## Safety rule
 
@@ -26,17 +28,17 @@ The raw transcript is written to the note file **before** the agent runs. If cla
 | A GGML Whisper model (`.bin`) | not included — see everywhisper's README |
 | [Claude Code CLI](https://claude.com/claude-code) | `claude` on PATH, logged in |
 
-**Permissions:** Microphone only. whispernote never pastes and never taps the keyboard, so it needs **no Accessibility grant**.
+**Permissions:** Microphone only. noteOS never pastes and never taps the keyboard, so it needs **no Accessibility grant**.
 
 ## Install
 
 ```bash
-git clone https://github.com/cdiak/whispernote.git ~/Development/Projects/whispernote
-cd ~/Development/Projects/whispernote
+git clone https://github.com/cdiak/noteOS.git ~/Development/Projects/noteOS
+cd ~/Development/Projects/noteOS
 ./install.sh
 ```
 
-`install.sh` builds `~/.local/bin/whispernote`, copies the orb assets to `~/.local/share/whispernote/orb`, and registers the login LaunchAgent `com.cdiak.whispernote`. Grant **Microphone** on first use.
+`install.sh` builds `~/.local/bin/noteos`, copies the orb assets to `~/.local/share/noteos/orb`, and registers the login LaunchAgent `com.cdiak.noteos`. Grant **Microphone** on first use.
 
 ## Use
 
@@ -45,19 +47,19 @@ cd ~/Development/Projects/whispernote
 3. The agent structures the note (**◍**, composing orb). On success the file is rewritten and renamed to `<timestamp> <title>.md`. A Glass sound confirms it.
 4. Press **⌥⇧N** during **◍** to cancel the agent. The raw transcript stays.
 
-Each note carries YAML frontmatter (`created`, `source: whispernote`), so Obsidian can sort and filter them.
+Each note carries YAML frontmatter (`created`, `source: noteos`), so Obsidian can sort and filter them.
 
 ## Configuration (environment variables)
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `WHISPERNOTE_DIR` | `~/Notes` | vault folder for new notes |
-| `WHISPERNOTE_MODEL` | claude CLI default | model passed to `claude --model` |
-| `WHISPERNOTE_TIMEOUT` | `120` | agent timeout, seconds |
+| `NOTEOS_DIR` | `~/Notes` | vault folder for new notes |
+| `NOTEOS_MODEL` | claude CLI default | model passed to `claude --model` |
+| `NOTEOS_TIMEOUT` | `120` | agent timeout, seconds |
 | `WHISPER_CLI` | auto-detected | path to `whisper-cli` |
 | `WHISPER_MODEL` | auto-detected | path to a GGML model |
 | `WHISPER_LANGUAGE` | `en` | transcription language |
-| `WHISPERNOTE_ORB_DIR` | auto-detected | orb assets; unset hides the orb |
+| `NOTEOS_ORB_DIR` | auto-detected | orb assets; unset hides the orb |
 
 Set them in the LaunchAgent plist (re-run `./install.sh` after exporting them), or in the shell when running the binary directly.
 

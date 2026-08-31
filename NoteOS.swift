@@ -1,11 +1,11 @@
-// whispernote — speak a note anywhere, get a structured Markdown file in your vault.
+// noteOS — speak a note anywhere, get a structured Markdown file in your vault.
 //
 // Option+Shift+N → ● record → Option+Shift+N → transcribe locally (whisper.cpp)
 // → structure with a coding agent (claude -p) → write ~/Notes/<timestamp> <title>.md
 //
 // Sibling of everywhisper (⌥⇧W, dictate → paste) and optionai (⌥A+I, agent at
 // the cursor). Same skeleton: one Swift file, a menu-bar item, a LaunchAgent.
-// Unlike its siblings, whispernote needs no Accessibility grant: it never
+// Unlike its siblings, noteOS needs no Accessibility grant: it never
 // pastes and never taps the keyboard. Microphone is the only permission.
 //
 // Failure is never data loss: the raw transcript is written to the note file
@@ -64,18 +64,18 @@ struct Config {
             ?? "claude"
 
         let notesDir =
-            env["WHISPERNOTE_DIR"].map { URL(fileURLWithPath: ($0 as NSString).expandingTildeInPath) }
+            env["NOTEOS_DIR"].map { URL(fileURLWithPath: ($0 as NSString).expandingTildeInPath) }
             ?? home.appendingPathComponent("Notes")
 
         let orbDir =
-            env["WHISPERNOTE_ORB_DIR"].map { URL(fileURLWithPath: $0) }
+            env["NOTEOS_ORB_DIR"].map { URL(fileURLWithPath: $0) }
             ?? firstExisting([
-                "\(home.path)/.local/share/whispernote/orb",
-                "\(home.path)/Development/Projects/whispernote/orb",
+                "\(home.path)/.local/share/noteos/orb",
+                "\(home.path)/Development/Projects/noteOS/orb",
             ]).map { URL(fileURLWithPath: $0) }
 
         // Empty env values (e.g. an unset plist key) mean "not set".
-        let claudeModel = env["WHISPERNOTE_MODEL"]?
+        let claudeModel = env["NOTEOS_MODEL"]?
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
         return Config(
@@ -86,7 +86,7 @@ struct Config {
                 ?? max(2, ProcessInfo.processInfo.processorCount / 2),
             claudeBinary: claude,
             claudeModel: (claudeModel?.isEmpty == false) ? claudeModel : nil,
-            timeoutSeconds: Double(env["WHISPERNOTE_TIMEOUT"] ?? "") ?? 120,
+            timeoutSeconds: Double(env["NOTEOS_TIMEOUT"] ?? "") ?? 120,
             notesDir: notesDir,
             orbDir: orbDir
         )
@@ -134,14 +134,14 @@ final class Recorder {
     func start() -> Bool {
         guard requestMicAccessSync() else {
             fputs(
-                "whispernote: microphone denied. Enable it in System Settings → Privacy & Security → Microphone.\n",
+                "noteos: microphone denied. Enable it in System Settings → Privacy & Security → Microphone.\n",
                 stderr
             )
             return false
         }
 
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("whispernote-\(UUID().uuidString).wav")
+            .appendingPathComponent("noteos-\(UUID().uuidString).wav")
 
         let settings: [String: Any] = [
             AVFormatIDKey: Int(kAudioFormatLinearPCM),
@@ -161,7 +161,7 @@ final class Recorder {
             isRecording = true
             return true
         } catch {
-            fputs("whispernote: recording failed: \(error.localizedDescription)\n", stderr)
+            fputs("noteos: recording failed: \(error.localizedDescription)\n", stderr)
             return false
         }
     }
@@ -244,7 +244,7 @@ final class Recorder {
 
     private func err(_ message: String) -> NSError {
         NSError(
-            domain: "whispernote", code: 1,
+            domain: "noteos", code: 1,
             userInfo: [NSLocalizedDescriptionKey: message]
         )
     }
@@ -263,7 +263,7 @@ final class AgentEngine {
     }
 
     static let instruction = """
-        You are WhisperNote, a note-structuring agent. The input is a raw \
+        You are noteOS, a note-structuring agent. The input is a raw \
         voice-dictation transcript, captured with local speech-to-text. \
         Rewrite it as a well-structured Markdown note for the user's Obsidian \
         vault. The FIRST line must be a heading: '# ' followed by a short \
@@ -325,7 +325,7 @@ final class AgentEngine {
         DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { [weak self] in
             guard let self, self.generation == gen, p.isRunning else { return }
             p.terminate()
-            fputs("whispernote: agent timed out after \(Int(timeout))s\n", stderr)
+            fputs("noteos: agent timed out after \(Int(timeout))s\n", stderr)
         }
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -346,7 +346,7 @@ final class AgentEngine {
                     onDone(
                         .failure(
                             NSError(
-                                domain: "whispernote", code: Int(status),
+                                domain: "noteos", code: Int(status),
                                 userInfo: [
                                     NSLocalizedDescriptionKey:
                                         "claude exited \(status): \(errText)"
@@ -386,7 +386,7 @@ enum NoteStore {
         let body = """
             ---
             created: \(stamp(now, "yyyy-MM-dd'T'HH:mm:ssZZZZZ"))
-            source: whispernote
+            source: noteos
             ---
 
             \(transcript)
@@ -560,7 +560,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         fputs(
             """
-            whispernote ready
+            noteos ready
               hotkey:  Option+Shift+N  (record → stop+compose; press while composing to cancel)
               whisper: \(config.whisperBinary)
               model:   \(config.modelPath)
@@ -597,7 +597,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             orb.hide()
             updateStatus()
             NSSound(named: .init("Pop"))?.play()
-            fputs("whispernote: canceled — raw transcript kept\n", stderr)
+            fputs("noteos: canceled — raw transcript kept\n", stderr)
         }
     }
 
@@ -658,7 +658,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             fail("could not write note: \(error.localizedDescription)")
             return
         }
-        fputs("whispernote: raw transcript saved: \(rawURL.path)\n", stderr)
+        fputs("noteos: raw transcript saved: \(rawURL.path)\n", stderr)
 
         state = .composing
         updateStatus()
@@ -673,7 +673,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             case .failure(let error):
                 NSSound(named: .init("Basso"))?.play()
                 fputs(
-                    "whispernote: agent failed — raw transcript kept at \(rawURL.path): \(error.localizedDescription)\n",
+                    "noteos: agent failed — raw transcript kept at \(rawURL.path): \(error.localizedDescription)\n",
                     stderr
                 )
 
@@ -681,7 +681,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 guard !note.isEmpty else {
                     NSSound.beep()
                     fputs(
-                        "whispernote: agent returned nothing — raw transcript kept at \(rawURL.path)\n",
+                        "noteos: agent returned nothing — raw transcript kept at \(rawURL.path)\n",
                         stderr
                     )
                     return
@@ -689,11 +689,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 do {
                     let dest = try NoteStore.finalize(note: note, rawURL: rawURL)
                     NSSound(named: .init("Glass"))?.play()
-                    fputs("whispernote: note written: \(dest.path)\n", stderr)
+                    fputs("noteos: note written: \(dest.path)\n", stderr)
                 } catch {
                     NSSound(named: .init("Basso"))?.play()
                     fputs(
-                        "whispernote: finalize failed — raw transcript kept at \(rawURL.path): \(error.localizedDescription)\n",
+                        "noteos: finalize failed — raw transcript kept at \(rawURL.path): \(error.localizedDescription)\n",
                         stderr
                     )
                 }
@@ -706,7 +706,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         orb.hide()
         updateStatus()
         NSSound.beep()
-        fputs("whispernote: \(message)\n", stderr)
+        fputs("noteos: \(message)\n", stderr)
     }
 
     // MARK: status item
@@ -715,7 +715,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = item.button {
             button.title = "N"
-            button.toolTip = "whispernote — Option+Shift+N"
+            button.toolTip = "noteos — Option+Shift+N"
         }
         let menu = NSMenu()
         menu.addItem(
@@ -742,16 +742,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         switch state {
         case .recording:
             statusItem?.button?.title = "●"
-            statusItem?.button?.toolTip = "whispernote — recording (⌥⇧N to stop)"
+            statusItem?.button?.toolTip = "noteos — recording (⌥⇧N to stop)"
         case .transcribing:
             statusItem?.button?.title = "…"
-            statusItem?.button?.toolTip = "whispernote — transcribing"
+            statusItem?.button?.toolTip = "noteos — transcribing"
         case .composing:
             statusItem?.button?.title = "◍"
-            statusItem?.button?.toolTip = "whispernote — composing (⌥⇧N to cancel)"
+            statusItem?.button?.toolTip = "noteos — composing (⌥⇧N to cancel)"
         case .idle:
             statusItem?.button?.title = "N"
-            statusItem?.button?.toolTip = "whispernote — Option+Shift+N"
+            statusItem?.button?.toolTip = "noteos — Option+Shift+N"
         }
     }
 
@@ -773,7 +773,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: hotkey — Option+Shift+N (Carbon, no Accessibility needed)
 
     private func registerHotkey() {
-        let hotKeyID = EventHotKeyID(signature: OSType(0x574E4F54), id: 1) // 'WNOT'
+        let hotKeyID = EventHotKeyID(signature: OSType(0x4E544F53), id: 1) // 'NTOS'
         let keyCode = UInt32(kVK_ANSI_N)
         let modifiers = UInt32(optionKey | shiftKey)
 

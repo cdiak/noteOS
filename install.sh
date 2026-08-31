@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Install whispernote → ~/.local/bin + orb assets → ~/.local/share/whispernote + login LaunchAgent
+# Install noteos → ~/.local/bin + orb assets → ~/.local/share/noteos + login LaunchAgent
 set -euo pipefail
 cd "$(dirname "$0")"
 
 BIN_DIR="${HOME}/.local/bin"
-SHARE_DIR="${HOME}/.local/share/whispernote"
+SHARE_DIR="${HOME}/.local/share/noteos"
 LAUNCH_AGENTS="${HOME}/Library/LaunchAgents"
-LABEL="com.cdiak.whispernote"
+LABEL="com.cdiak.noteos"
 PLIST="${LAUNCH_AGENTS}/${LABEL}.plist"
-DEST="${BIN_DIR}/whispernote"
+DEST="${BIN_DIR}/noteos"
 
 mkdir -p "$BIN_DIR" "$SHARE_DIR" "$LAUNCH_AGENTS"
 
@@ -64,9 +64,9 @@ if [[ -z "${CLAUDE_CLI:-}" ]]; then
     CLAUDE_CLI="/opt/homebrew/bin/claude"
   fi
 fi
-WHISPERNOTE_MODEL="${WHISPERNOTE_MODEL:-}"
-WHISPERNOTE_TIMEOUT="${WHISPERNOTE_TIMEOUT:-120}"
-WHISPERNOTE_DIR="${WHISPERNOTE_DIR:-${HOME}/Notes}"
+NOTEOS_MODEL="${NOTEOS_MODEL:-}"
+NOTEOS_TIMEOUT="${NOTEOS_TIMEOUT:-120}"
+NOTEOS_DIR="${NOTEOS_DIR:-${HOME}/Notes}"
 
 if [[ ! -x "$CLAUDE_CLI" ]]; then
   echo "warning: claude CLI not found at $CLAUDE_CLI. Set CLAUDE_CLI and re-run." >&2
@@ -81,9 +81,9 @@ WCLI_XML="$(xml_escape "$WHISPER_CLI")"
 WMODEL_XML="$(xml_escape "$WHISPER_MODEL")"
 WLANG_XML="$(xml_escape "$WHISPER_LANGUAGE")"
 CCLI_XML="$(xml_escape "$CLAUDE_CLI")"
-CMODEL_XML="$(xml_escape "$WHISPERNOTE_MODEL")"
-TIMEOUT_XML="$(xml_escape "$WHISPERNOTE_TIMEOUT")"
-NOTES_XML="$(xml_escape "$WHISPERNOTE_DIR")"
+CMODEL_XML="$(xml_escape "$NOTEOS_MODEL")"
+TIMEOUT_XML="$(xml_escape "$NOTEOS_TIMEOUT")"
+NOTES_XML="$(xml_escape "$NOTEOS_DIR")"
 ORB_XML="$(xml_escape "${SHARE_DIR}/orb")"
 DEST_XML="$(xml_escape "$DEST")"
 HOME_XML="$(xml_escape "$HOME")"
@@ -109,13 +109,13 @@ cat > "$PLIST" <<PLIST
     <string>${WLANG_XML}</string>
     <key>CLAUDE_CLI</key>
     <string>${CCLI_XML}</string>
-    <key>WHISPERNOTE_MODEL</key>
+    <key>NOTEOS_MODEL</key>
     <string>${CMODEL_XML}</string>
-    <key>WHISPERNOTE_TIMEOUT</key>
+    <key>NOTEOS_TIMEOUT</key>
     <string>${TIMEOUT_XML}</string>
-    <key>WHISPERNOTE_DIR</key>
+    <key>NOTEOS_DIR</key>
     <string>${NOTES_XML}</string>
-    <key>WHISPERNOTE_ORB_DIR</key>
+    <key>NOTEOS_ORB_DIR</key>
     <string>${ORB_XML}</string>
     <key>PATH</key>
     <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
@@ -125,9 +125,9 @@ cat > "$PLIST" <<PLIST
   <key>KeepAlive</key>
   <true/>
   <key>StandardOutPath</key>
-  <string>${HOME_XML}/Library/Logs/whispernote.log</string>
+  <string>${HOME_XML}/Library/Logs/noteos.log</string>
   <key>StandardErrorPath</key>
-  <string>${HOME_XML}/Library/Logs/whispernote.log</string>
+  <string>${HOME_XML}/Library/Logs/noteos.log</string>
   <key>ProcessType</key>
   <string>Interactive</string>
 </dict>
@@ -138,21 +138,21 @@ launchctl bootstrap "gui/$(id -u)" "$PLIST" 2>/dev/null \
   || launchctl load "$PLIST"
 
 echo
-echo "Installed whispernote"
+echo "Installed noteos"
 echo "  binary:  $DEST"
 echo "  orb:     ${SHARE_DIR}/orb"
 echo "  agent:   $PLIST"
-echo "  log:     $HOME/Library/Logs/whispernote.log"
+echo "  log:     $HOME/Library/Logs/noteos.log"
 echo "  whisper: $WHISPER_CLI"
 echo "  model:   ${WHISPER_MODEL:-(not set)}"
 echo "  claude:  $CLAUDE_CLI"
-echo "  notes:   $WHISPERNOTE_DIR"
+echo "  notes:   $NOTEOS_DIR"
 echo
 echo "Hotkey: Option+Shift+N  (record → stop+compose; press while composing to cancel)"
 echo
 echo "Permissions (first run):"
-echo "  System Settings → Privacy & Security → Microphone → whispernote"
-echo "  No Accessibility grant is needed — whispernote never pastes or taps keys."
+echo "  System Settings → Privacy & Security → Microphone → noteos"
+echo "  No Accessibility grant is needed — noteos never pastes or taps keys."
 echo "  If missing from the list, run once: $DEST"
 echo
 echo "Menu bar: \"N\" idle · \"●\" recording · \"…\" transcribing · \"◍\" composing"
