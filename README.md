@@ -33,10 +33,12 @@ The raw transcript is written to the note file **before** the agent runs. If cla
 ## Install
 
 ```bash
-git clone https://github.com/cdiak/noteOS.git ~/Development/Projects/noteOS
-cd ~/Development/Projects/noteOS
+git clone https://github.com/cdiak/noteOS.git
+cd noteOS
 ./install.sh
 ```
+
+Clone it anywhere. The clone is only build source.
 
 `install.sh` builds `~/.local/bin/noteos`, copies the orb assets to `~/.local/share/noteos/orb`, and registers the login LaunchAgent `com.cdiak.noteos`. Grant **Microphone** on first use.
 

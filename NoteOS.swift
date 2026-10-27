@@ -45,12 +45,11 @@ struct Config {
         let model =
             env["WHISPER_MODEL"]
             ?? firstExisting([
-                "\(home.path)/Development/Models/whisper/ggml-base.en.bin",
-                "\(home.path)/models/whisper/ggml-base.en.bin",
                 "\(home.path)/.cache/whisper/ggml-base.en.bin",
+                "\(home.path)/models/whisper/ggml-base.en.bin",
                 "/opt/homebrew/share/whisper-cpp/ggml-base.en.bin",
             ])
-            ?? "\(home.path)/models/whisper/ggml-base.en.bin"
+            ?? "\(home.path)/.cache/whisper/ggml-base.en.bin"
 
         let claude =
             env["CLAUDE_CLI"]
@@ -71,7 +70,6 @@ struct Config {
             env["NOTEOS_ORB_DIR"].map { URL(fileURLWithPath: $0) }
             ?? firstExisting([
                 "\(home.path)/.local/share/noteos/orb",
-                "\(home.path)/Development/Projects/noteOS/orb",
             ]).map { URL(fileURLWithPath: $0) }
 
         // Empty env values (e.g. an unset plist key) mean "not set".

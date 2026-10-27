@@ -34,9 +34,8 @@ fi
 # Resolve a whisper model: env → common locations
 if [[ -z "${WHISPER_MODEL:-}" ]]; then
   for candidate in \
-    "${HOME}/Development/Models/whisper/ggml-base.en.bin" \
-    "${HOME}/models/whisper/ggml-base.en.bin" \
     "${HOME}/.cache/whisper/ggml-base.en.bin" \
+    "${HOME}/models/whisper/ggml-base.en.bin" \
     "/opt/homebrew/share/whisper-cpp/ggml-base.en.bin"
   do
     if [[ -f "$candidate" ]]; then
@@ -48,7 +47,7 @@ fi
 WHISPER_MODEL="${WHISPER_MODEL:-}"
 WHISPER_LANGUAGE="${WHISPER_LANGUAGE:-en}"
 
-if [[ -z "$WHISPER_MODEL" ]]; then
+if [[ ! -f "$WHISPER_MODEL" ]]; then
   echo "warning: no whisper model found. Set WHISPER_MODEL to a ggml model path." >&2
 fi
 
